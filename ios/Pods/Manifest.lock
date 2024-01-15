@@ -1,0 +1,21 @@
+PODS:
+  - Uploadcare (0.13.0)
+
+DEPENDENCIES:
+  - Uploadcare (from `https://github.com/uploadcare/uploadcare-swift`)
+
+EXTERNAL SOURCES:
+  Uploadcare:
+    :git: https://github.com/uploadcare/uploadcare-swift
+
+CHECKOUT OPTIONS:
+  Uploadcare:
+    :commit: 3ab0706a726abcb9c935347add80f855c2a08f12
+    :git: https://github.com/uploadcare/uploadcare-swift
+
+SPEC CHECKSUMS:
+  Uploadcare: 36995d301a151f61ef027174807e4884d4c0f339
+
+PODFILE CHECKSUM: fbf68a6ed3b03c65d02d2aaa5af06fda9fbbb514
+
+COCOAPODS: 1.14.3

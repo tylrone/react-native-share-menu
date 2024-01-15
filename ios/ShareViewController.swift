@@ -34,27 +34,31 @@ class ShareViewController: SLComposeServiceViewController {
       print("Error: \(NO_INFO_PLIST_URL_SCHEME_ERROR)")
     }
   }
-
-    override func isContentValid() -> Bool {
-        // Do validation of contentText and/or NSExtensionContext attachments here
-        return true
+  
+  override func loadPreviewView() -> UIView! {
+    return nil
+  }
+  
+  override func isContentValid() -> Bool {
+    // Do validation of contentText and/or NSExtensionContext attachments here
+    return true
+  }
+  
+  override func didSelectPost() {
+    // This is called after the user selects Post. Do the upload of contentText and/or NSExtensionContext attachments.
+    guard let items = extensionContext?.inputItems as? [NSExtensionItem] else {
+      cancelRequest()
+      return
     }
-
-    override func didSelectPost() {
-        // This is called after the user selects Post. Do the upload of contentText and/or NSExtensionContext attachments.
-      guard let items = extensionContext?.inputItems as? [NSExtensionItem] else {
-        cancelRequest()
-        return
-      }
-
-      handlePost(items)
-    }
-
-    override func configurationItems() -> [Any]! {
-        // To add configuration options via table cells at the bottom of the sheet, return an array of SLComposeSheetConfigurationItem here.
-        return []
-    }
-
+    
+    handlePost(items)
+  }
+  
+  override func configurationItems() -> [Any]! {
+    // To add configuration options via table cells at the bottom of the sheet, return an array of SLComposeSheetConfigurationItem here.
+    return []
+  }
+  
   func handlePost(_ items: [NSExtensionItem], extraData: [String:Any]? = nil) {
     DispatchQueue.global().async {
       guard let hostAppId = self.hostAppId else {
@@ -65,22 +69,22 @@ class ShareViewController: SLComposeServiceViewController {
         self.exit(withError: NO_APP_GROUP_ERROR)
         return
       }
-
+      
       if let data = extraData {
         self.storeExtraData(data)
       } else {
         self.removeExtraData()
       }
-
+      
       let semaphore = DispatchSemaphore(value: 0)
       var results: [Any] = []
-
+      
       for item in items {
         guard let attachments = item.attachments else {
           self.cancelRequest()
           return
         }
-
+        
         for provider in attachments {
           if provider.isText {
             self.storeText(withProvider: provider, semaphore)
@@ -89,19 +93,19 @@ class ShareViewController: SLComposeServiceViewController {
           } else {
             self.storeFile(withProvider: provider, semaphore)
           }
-
+          
           semaphore.wait()
         }
       }
-
+      
       userDefaults.set(self.sharedItems,
                        forKey: USER_DEFAULTS_KEY)
       userDefaults.synchronize()
-
+      
       self.openHostApp()
     }
   }
-
+  
   func storeExtraData(_ data: [String:Any]) {
     guard let hostAppId = self.hostAppId else {
       print("Error: \(NO_INFO_PLIST_INDENTIFIER_ERROR)")
@@ -114,7 +118,7 @@ class ShareViewController: SLComposeServiceViewController {
     userDefaults.set(data, forKey: USER_DEFAULTS_EXTRA_DATA_KEY)
     userDefaults.synchronize()
   }
-
+  
   func removeExtraData() {
     guard let hostAppId = self.hostAppId else {
       print("Error: \(NO_INFO_PLIST_INDENTIFIER_ERROR)")
@@ -175,7 +179,7 @@ class ShareViewController: SLComposeServiceViewController {
         return
       }
       guard let groupFileManagerContainer = FileManager.default
-              .containerURL(forSecurityApplicationGroupIdentifier: "group.\(hostAppId)")
+        .containerURL(forSecurityApplicationGroupIdentifier: "group.\(hostAppId)")
       else {
         self.exit(withError: NO_APP_GROUP_ERROR)
         return
@@ -196,7 +200,7 @@ class ShareViewController: SLComposeServiceViewController {
       semaphore.signal()
     }
   }
-
+  
   func moveFileToDisk(from srcUrl: URL, to destUrl: URL) -> Bool {
     do {
       if FileManager.default.fileExists(atPath: destUrl.path) {
@@ -244,5 +248,5 @@ class ShareViewController: SLComposeServiceViewController {
   func cancelRequest() {
     extensionContext!.cancelRequest(withError: NSError())
   }
-
+  
 }
